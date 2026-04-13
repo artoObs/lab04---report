@@ -1,5 +1,5 @@
 #include <iostream>
-#include "formatter_ex.h"
+#include "formatter.h"
 
 int main() {
     std::cout << formatter("Hello, World!") << std::endl;
