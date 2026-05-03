@@ -8,12 +8,29 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.compiler }} on Linux
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }} / ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        compiler: [gcc, clang]
+        include:
+
+          - os: ubuntu-latest
+            compiler: gcc
+            cc: gcc
+            cxx: g++
+          - os: ubuntu-latest
+            compiler: clang
+            cc: clang
+            cxx: clang++
+
+          - os: windows-latest
+            compiler: msvc
+            cc: cl
+            cxx: cl
+            
+            cmake_generator: "Visual Studio 17 2022"
+            cmake_arch: "x64"
 
     steps:
       - name: Checkout code
@@ -24,11 +41,27 @@ jobs:
         with:
           cmake-version: '3.16.x'
 
-      - name: Install compilers
+      - name: Install Linux compilers
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y build-essential clang
 
-      - name: Configure CMake
-        run: cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install -DCMAKE_C_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
+      - name: Show MSVC version
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: cl.exe
 
-      - name: Build
+      - name: Configure CMake (Linux / macOS)
+        if: runner.os != 'Windows'
+        run: cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install -DCMAKE_C_COMPILER=${{ matrix.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        run: cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install -G "${{ matrix.cmake_generator }}" -A ${{ matrix.cmake_arch }}
+        
+      - name: Build (Linux / macOS)
+        if: runner.os != 'Windows'
         run: cmake --build _build
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build _build --config Release
