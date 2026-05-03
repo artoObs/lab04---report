@@ -46,17 +46,16 @@ jobs:
 
       - name: Configure CMake (Unix)
         if: runner.os != 'Windows'
-        run: cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install -DCMAKE_C_COMPILER=${{ matrix.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+        run: cmake -S . -B _build -DCMAKE_INSTALL_PREFIX=_install -DCMAKE_C_COMPILER=${{ matrix.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
-        run: cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install -G "${{ matrix.cmake_generator }}" -A ${{ matrix.cmake_arch }}
+        run: cmake -S . -B _build -DCMAKE_INSTALL_PREFIX=_install -G "${{ matrix.cmake_generator }}" -A ${{ matrix.cmake_arch }}
 
       - name: Build (Unix)
         if: runner.os != 'Windows'
         run: cmake --build _build
 
-      # Сборка для Windows (Release)
       - name: Build (Windows)
         if: runner.os == 'Windows'
         run: cmake --build _build --config Release
