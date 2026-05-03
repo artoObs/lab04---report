@@ -14,11 +14,11 @@ jobs:
     strategy:
       matrix:
         include:
-
           - os: ubuntu-latest
             compiler: gcc
             cc: gcc
             cxx: g++
+
           - os: ubuntu-latest
             compiler: clang
             cc: clang
@@ -28,7 +28,6 @@ jobs:
             compiler: msvc
             cc: cl
             cxx: cl
-            
             cmake_generator: "Visual Studio 17 2022"
             cmake_arch: "x64"
 
@@ -45,23 +44,19 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y build-essential clang
 
-      - name: Show MSVC version
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: cl.exe
-
-      - name: Configure CMake (Linux / macOS)
+      - name: Configure CMake (Unix)
         if: runner.os != 'Windows'
         run: cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install -DCMAKE_C_COMPILER=${{ matrix.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
         run: cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install -G "${{ matrix.cmake_generator }}" -A ${{ matrix.cmake_arch }}
-        
-      - name: Build (Linux / macOS)
+
+      - name: Build (Unix)
         if: runner.os != 'Windows'
         run: cmake --build _build
 
+      # Сборка для Windows (Release)
       - name: Build (Windows)
         if: runner.os == 'Windows'
         run: cmake --build _build --config Release
