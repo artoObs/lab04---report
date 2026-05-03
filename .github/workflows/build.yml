@@ -23,12 +23,12 @@ jobs:
             compiler: clang
             cc: clang
             cxx: clang++
-
+            
           - os: windows-latest
             compiler: msvc
             cc: cl
             cxx: cl
-            cmake_generator: "Visual Studio 17 2022"
+            cmake_generator: "Visual Studio 16 2019"
             cmake_arch: "x64"
 
     steps:
